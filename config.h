@@ -4,14 +4,25 @@
 #include <string>
 
 struct Configuration {
+    bool initialised;
     std::string hostname;
     bool quiet;
     bool clean;
     std::string remoteDir;
+    std::string scp;
+    std::string ssh;
 
-    Configuration() : hostname(""), quiet(false), clean(true), remoteDir("/tmp") {}
+    Configuration() :
+        initialised(false),
+        hostname(""),
+        quiet(false),
+        clean(true),
+        remoteDir("/tmp"),
+        scp("/usr/bin/scp"),
+        ssh("/usr/bin/ssh")
+        {}
 };
 
-Configuration getConfiguration();
+Configuration& getConfiguration();
 
 #endif // CONFIG_H

@@ -12,6 +12,8 @@
 #include <iostream>
 #endif
 
+Configuration config;
+
 std::string getConfigFileName()
 {
     std::string homeDir(getenv("HOME"));
@@ -48,8 +50,13 @@ bool str2bool(std::string str)
     return result;
 }
 
-Configuration getConfiguration() 
+Configuration& getConfiguration()
 {
+    if (config.initialised)
+    {
+        return config;
+    }
+
     std::ifstream configFile(getConfigFileName());
     std::map<std::string, std::string> options;
 	bool error = false;
@@ -104,8 +111,6 @@ Configuration getConfiguration()
         }
 #endif
 	
-    Configuration config;
-
 	try
 	{
 		if (options.count("hostname") > 0)
@@ -127,6 +132,16 @@ Configuration getConfiguration()
 		{
 			config.remoteDir = options["remote_directory"];
 		}
+
+		if (options.count("scp") > 0)
+		{
+			config.scp = options["scp"];
+		}
+
+		if (options.count("ssh") > 0)
+		{
+			config.ssh = options["ssh"];
+		}
 	}
 	catch (std::invalid_argument &e)
 	{
@@ -147,6 +162,8 @@ Configuration getConfiguration()
         ss << "There was an error processing the config file " << getConfigFileName() << std::endl << problem;
         throw std::invalid_argument(ss.str());
     }
+
+    config.initialised = true;
 
     return config;
 }
