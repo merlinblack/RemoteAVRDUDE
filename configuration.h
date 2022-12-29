@@ -3,7 +3,8 @@
 
 #include <string>
 
-struct Configuration {
+class Configuration {
+    public:
     bool initialised;
     std::string hostname;
     bool quiet;
@@ -11,7 +12,9 @@ struct Configuration {
     std::string remoteDir;
     std::string scp;
     std::string ssh;
+    std::string avrdude;
 
+    private:
     Configuration() :
         initialised(false),
         hostname(""),
@@ -19,8 +22,11 @@ struct Configuration {
         clean(true),
         remoteDir("/tmp"),
         scp("/usr/bin/scp"),
-        ssh("/usr/bin/ssh")
+        ssh("/usr/bin/ssh"),
+        avrdude("/usr/local/bin/avrdude")
         {}
+
+    friend Configuration& getConfiguration();
 };
 
 Configuration& getConfiguration();
