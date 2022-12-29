@@ -54,7 +54,15 @@ void handleUpdate(string argument, FileCopyList& filesBefore, FileCopyList& file
 	}
 
 	// Depding on operation, add to either before or after copy list and generate remote filename
-	string remote = config.hostname + ":" + config.remoteDir + base_name(filename);
+	string remote = config.remoteDir + base_name(filename);
+
+	ostringstream newarg;
+
+	newarg << "-U" << memtype << ":" << operation << ":" << remote << format;
+
+	args.push_back(newarg.str());
+
+	remote = config.hostname + ":" + remote;
 
 	switch (operation[0])
 	{
@@ -68,12 +76,6 @@ void handleUpdate(string argument, FileCopyList& filesBefore, FileCopyList& file
 		default:
 			throw invalid_argument("Operation not supported: " + operation);
 	}
-
-	ostringstream oss;
-
-	oss << "-U" << memtype << ":" << operation << ":" << remote << format;
-
-	args.push_back(oss.str());
 }
 
 void handleLogFile(string local, FileCopyList& filesAfter, ArgumentList& args)
@@ -82,13 +84,14 @@ void handleLogFile(string local, FileCopyList& filesAfter, ArgumentList& args)
 
 	// Add to list of files to copy back and generate remote filename
 
-	string remote = config.hostname + ":" + config.remoteDir + base_name(local);
-
-	filesAfter[remote] = local;
+	string remote = config.remoteDir + base_name(local);
 
 	ostringstream oss;
 	oss << "-l" << remote;
 	args.push_back(oss.str());
+
+	remote = config.hostname + ":" + remote;
+	filesAfter[remote] = local;
 }
 
 int main(int argc, char *argv[])
