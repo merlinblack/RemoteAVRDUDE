@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 		{
 			if (!config.quiet)
 			{
-				std::cout << from << " -> " << to << endl;
+				std::cout << to << " <- " << from << endl;
 			}
 			scp( from, to );
 		}

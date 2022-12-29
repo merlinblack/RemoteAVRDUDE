@@ -56,6 +56,7 @@ void scp(const string& from, const string& to)
 	Configuration& config = getConfiguration();
 	StringVector args;
 
+	args.push_back("-q");
 	args.push_back(from);
 	args.push_back(to);
 
