@@ -157,17 +157,15 @@ Configuration& getConfiguration()
     OptionMap options;
 	string problem;
 
-    if (configFile.good()) {
+    if (configFile.good())
+    {
         problem = parseFile(configFile, options);
     }
+    else
+    {
+        problem = "Could not open file";
+    }
 
-#ifdef DEBUG
-        for(auto const& [key, value] : options)
-        {
-            std::cout << key << " = " << value << std::endl;
-        }
-#endif
-	
     if (problem.empty())
     {
         problem = mapOptionsToConfig(options, config);

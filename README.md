@@ -14,7 +14,7 @@ This file is located at ```$HOME/.local/remote_avrdude.conf```
 ## Options:
 
 ### hostname
-The hostname and optionally prefixed with ```username@```. This option is the only required option.
+The hostname and optionally prefixed with ```username@```. This is the only required option.
     
 For example:
     

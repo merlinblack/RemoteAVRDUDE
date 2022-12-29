@@ -63,7 +63,7 @@ void scp(const string& from, const string& to)
 	call_external(config.scp, args);
 }
 
-void ssh_command(const string& host, const string& command)
+int ssh_command(const string& host, const string& command)
 {
 	Configuration& config = getConfiguration();
 	StringVector args;
@@ -71,5 +71,5 @@ void ssh_command(const string& host, const string& command)
 	args.push_back(host);
 	args.push_back(command);
 
-	call_external(config.ssh, args);
+	return call_external(config.ssh, args);
 }

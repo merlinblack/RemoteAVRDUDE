@@ -14,6 +14,7 @@ using std::ostringstream;
 
 using std::exception;
 using std::invalid_argument;
+using std::cout;
 using std::cerr;
 using std::endl;
 
@@ -52,17 +53,17 @@ void handleUpdate(string argument, FileCopyList& filesBefore, FileCopyList& file
 		format = ":" + argument.substr(start, pos - start);
 	}
 
-	// Depding on operation, add to either before or after copy list and geneerate remote filename
-	string remote = config.remoteDir + base_name(filename);
+	// Depding on operation, add to either before or after copy list and generate remote filename
+	string remote = config.hostname + ":" + config.remoteDir + base_name(filename);
 
 	switch (operation[0])
 	{
 		case 'w' :
 		case 'v':
-			filesBefore[filename] = config.hostname + ":" + remote;
+			filesBefore[filename] = remote;
 			break;
 		case 'r':
-			filesAfter[config.hostname + ":" + remote] = filename;
+			filesAfter[remote] = filename;
 			break;
 		default:
 			throw invalid_argument("Operation not supported: " + operation);
@@ -81,9 +82,9 @@ void handleLogFile(string local, FileCopyList& filesAfter, ArgumentList& args)
 
 	// Add to list of files to copy back and generate remote filename
 
-	string remote = config.remoteDir + base_name(local);
+	string remote = config.hostname + ":" + config.remoteDir + base_name(local);
 
-	filesAfter[config.hostname + ":" + remote] = local;
+	filesAfter[remote] = local;
 
 	ostringstream oss;
 	oss << "-l" << remote;
@@ -92,6 +93,8 @@ void handleLogFile(string local, FileCopyList& filesAfter, ArgumentList& args)
 
 int main(int argc, char *argv[])
 {
+	int ret = EXIT_FAILURE;
+
 	try {
 		Configuration& config = getConfiguration();
 
@@ -110,7 +113,7 @@ int main(int argc, char *argv[])
 			switch (opt)
 			{
 			case 'C':
-				// Drop it
+				// Drop it - use the standard one on the remote
 				break;
 
 			case 'U':
@@ -141,38 +144,38 @@ int main(int argc, char *argv[])
 		{
 			if (!config.quiet)
 			{
-				std::cout << from << " -> " << to << endl;
+				cout << from << " -> " << to << endl;
 			}
 			scp( from, to );
 		}
 
-		ostringstream oss;
-		oss << config.avrdude;
+		ostringstream command;
+		command << config.avrdude;
 		for (auto const& arg : args)
 		{
-			oss << " " << arg;
+			command << " " << arg;
 		}
 
 		if (!config.quiet)
 		{
-			std::cout << oss.str() << endl;
+			cout << config.hostname << ": " << command.str() << endl;
 		}
 
-		ssh_command(config.hostname, oss.str());
+		ret = ssh_command(config.hostname, command.str());
 
 		for (auto const& [ from, to ] : filesAfter)
 		{
 			if (!config.quiet)
 			{
-				std::cout << to << " <- " << from << endl;
+				cout << to << " <- " << from << endl;
 			}
 			scp( from, to );
 		}
 	}
 	catch(exception& e)
 	{
-		std::cerr << "There was a problem: " << e.what() << std::endl;
+		cerr << "There was a problem: " << e.what() << endl;
 	}
 
-	return EXIT_SUCCESS;
+	return ret;
 }

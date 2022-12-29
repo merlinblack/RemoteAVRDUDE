@@ -4,6 +4,6 @@
 #include <string>
 
 void scp(const std::string& from, const std::string& to);
-void ssh_command(const std::string& host, const std::string& command);
+int ssh_command(const std::string& host, const std::string& command);
 
 #endif // EXTERNALCALL_H
