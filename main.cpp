@@ -32,25 +32,23 @@ void handleUpdate(string argument, FileCopyList& filesBefore, FileCopyList& file
 
 	// Split argument into components
 	// <memtype>:r|w|v:<filename>[:format]
+
+	string memtype, operation, filename, format;
+
 	size_t start = 0;
-	size_t pos = argument.find_first_of(':');
+	size_t end;
 
-	string memtype = argument.substr(start, pos - start);
-
-	start = pos + 1;
-	pos = argument.find_first_of(':', start);
-	string operation = argument.substr(start, pos - start);
-
-	start = pos + 1;
-	pos = argument.find_first_of(':', start);
-	string filename = argument.substr(start, pos - start);
-
-	string format;
-	if (pos != string::npos)
+	for (auto component : { &memtype, &operation, &filename })
 	{
-		start = pos + 1;
-		pos = argument.find_first_of(':', start);
-		format = ":" + argument.substr(start, pos - start);
+		end = argument.find_first_of(':', start);
+		*component = argument.substr(start, end - start);
+		start = end + 1;
+	}
+
+	if (end != string::npos)
+	{
+		end = argument.find_first_of(':', start);
+		format = ":" + argument.substr(start, end - start);
 	}
 
 	// Depding on operation, add to either before or after copy list and generate remote filename

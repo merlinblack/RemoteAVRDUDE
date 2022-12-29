@@ -23,98 +23,95 @@ using OptionMap = map<string,string>;
 
 string getConfigFileName()
 {
-    string homeDir(getenv("HOME"));
+	string homeDir(getenv("HOME"));
 
-    return homeDir + string("/.local/remote_avrdude.conf");
+	return homeDir + string("/.local/remote_avrdude.conf");
 }
 
 string parseFile(ifstream& file, OptionMap& options)
 {
-    string key, value, problem;
-    char buffer[255];
-    int lineCount = 0;
+	string key, value, problem;
+	char buffer[255];
+	int lineCount = 0;
 
-    for (string line; getline(file, line);)
-    {
-        lineCount++;
-        if (line[0] == '#' || line.size() == 0)
-        {
-            continue; // Commented out or blank line
-        }
+	for (string line; getline(file, line);)
+	{
+		lineCount++;
+		if (line[0] == '#' || line.size() == 0)
+		{
+			continue; // Commented out or blank line
+		}
 
-        istringstream iss(line);
+		istringstream iss(line);
 
-        iss.getline(buffer, 255, '=');
+		iss.getline(buffer, 255, '=');
 
-        if (iss.fail())
-        {
-            problem = "Problem with a key on line: " + lineCount;
-        }
-        else
-        {
-            key = buffer;
-            iss.getline(buffer, 255);
-            if (iss.fail())
-            {
-                ostringstream ss;
-                ss << "Problem with a value for key: " << key << "on line: " << lineCount;
-                problem = ss.str();
-                break;
-            }
-            else
-            {
-                value = buffer;
+		if (iss.fail())
+		{
+			problem = "Problem with a key on line: " + lineCount;
+		}
+		else
+		{
+			key = buffer;
+			iss.getline(buffer, 255);
+			if (iss.fail())
+			{
+				ostringstream ss;
+				ss << "Problem with a value for key: " << key << "on line: " << lineCount;
+				problem = ss.str();
+				break;
+			}
+			else
+			{
+				value = buffer;
 
-                str_trim(key);
-                str_trim(value);
+				str_trim(key);
+				str_trim(value);
 
-                options[key] = value;
-            }
-        }
-    }
+				options[key] = value;
+			}
+		}
+	}
 
-    return problem;
+	return problem;
 }
 
 string mapOptionsToConfig(OptionMap& options, Configuration& config)
 {
-    string problem;
+	string problem;
+
+	class Option {
+		public:
+		string key;
+		string *strptr;
+		bool *boolptr;
+	};
+
+	Option availableOptions[] = {
+		{ "hostname", &config.hostname },
+		{ "quiet",    nullptr, &config.quiet },
+		{ "clean",    nullptr, &config.clean },
+		{ "scp",      &config.scp },
+		{ "ssh",      &config.ssh },
+		{ "avrdude",  &config.avrdude },
+		{ "remote_directory", &config.remoteDir },
+	};
 
 	try
 	{
-		if (options.count("hostname") > 0)
+		for(auto& opt : availableOptions)
 		{
-			config.hostname = options["hostname"];
-		}
-
-		if (options.count("quiet") > 0)
-	    {
-	        config.quiet = str2bool(options["quiet"]);
-	    }
-
-	    if (options.count("clean") > 0)
-	    {
-	        config.clean = str2bool(options["clean"]);
-	    }
-
-		if (options.count("remote_directory") > 0)
-		{
-			config.remoteDir = options["remote_directory"];
-		}
-
-		if (options.count("scp") > 0)
-		{
-			config.scp = options["scp"];
-		}
-
-		if (options.count("ssh") > 0)
-		{
-			config.ssh = options["ssh"];
-		}
-
-		if (options.count("avrdude") > 0)
-		{
-			config.avrdude = options["avrdude"];
+			if (options.count(opt.key))
+			{
+				if (opt.boolptr)
+				{
+					*opt.boolptr = str2bool(options[opt.key]);
+				}
+				else
+				{
+					*opt.strptr = options[opt.key];
+				}                
+			}
 		}
 	}
 	catch (invalid_argument &e)
@@ -122,68 +119,68 @@ string mapOptionsToConfig(OptionMap& options, Configuration& config)
 		problem = e.what();
 	}
 
-    return problem;
+	return problem;
 }
 
 string checkRequiredConfig(Configuration& config)
 {
-    string problem;
-    
-    if (config.hostname.size() == 0)
-    {
-        problem = "Missing hostname from configuration.";
-    }
+	string problem;
+	
+	if (config.hostname.size() == 0)
+	{
+		problem = "Missing hostname from configuration.";
+	}
 
-    // Make sure remote dir has a '/' on the end.
-    if (*(config.remoteDir.rbegin()) != '/')
-    {
-        config.remoteDir.append("/");
-    }
+	// Make sure remote dir has a '/' on the end.
+	if (*(config.remoteDir.rbegin()) != '/')
+	{
+		config.remoteDir.append("/");
+	}
 
-    return problem;
+	return problem;
 }
 
 Configuration& getConfiguration()
 {
-    static Configuration config;
+	static Configuration config;
 
-    if (config.initialised)
-    {
-        return config;
-    }
+	if (config.initialised)
+	{
+		return config;
+	}
 
-    ifstream configFile(getConfigFileName());
+	ifstream configFile(getConfigFileName());
 
-    OptionMap options;
+	OptionMap options;
 	string problem;
 
-    if (configFile.good())
-    {
-        problem = parseFile(configFile, options);
-    }
-    else
-    {
-        problem = "Could not open file";
-    }
+	if (configFile.good())
+	{
+		problem = parseFile(configFile, options);
+	}
+	else
+	{
+		problem = "Could not open file";
+	}
 
-    if (problem.empty())
-    {
-        problem = mapOptionsToConfig(options, config);
-    }
+	if (problem.empty())
+	{
+		problem = mapOptionsToConfig(options, config);
+	}
 
-    if (problem.empty())
-    {
-        problem = checkRequiredConfig(config);
-    }
+	if (problem.empty())
+	{
+		problem = checkRequiredConfig(config);
+	}
 			   
-    if (!problem.empty()) 
-    {
+	if (!problem.empty()) 
+	{
 		std::ostringstream ss;
-        ss << "There was an error processing the config file " << getConfigFileName() << ", " << problem;
-        throw invalid_argument(ss.str());
-    }
+		ss << "There was an error processing the config file " << getConfigFileName() << ", " << problem;
+		throw invalid_argument(ss.str());
+	}
 
-    config.initialised = true;
+	config.initialised = true;
 
-    return config;
+	return config;
 }
