@@ -47,8 +47,7 @@ void handleUpdate(string argument, FileCopyList& filesBefore, FileCopyList& file
 
 	if (end != string::npos)
 	{
-		end = argument.find_first_of(':', start);
-		format = ":" + argument.substr(start, end - start);
+		format = ":" + argument.substr(start);
 	}
 
 	// Depding on operation, add to either before or after copy list and generate remote filename
