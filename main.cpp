@@ -26,9 +26,9 @@ string base_name(string const& path)
 	return path.substr(path.find_last_of('/') + 1);
 }
 
-void handleUpdate(string argument, FileCopyList& filesBefore, FileCopyList& filesAfter, ArgumentList& args)
+void handle_update(string argument, FileCopyList& filesBefore, FileCopyList& filesAfter, ArgumentList& args)
 {
-	Configuration& config = getConfiguration();
+	Configuration& config = get_configuration();
 
 	// Split argument into components
 	// <memtype>:r|w|v:<filename>[:format]
@@ -75,9 +75,9 @@ void handleUpdate(string argument, FileCopyList& filesBefore, FileCopyList& file
 	}
 }
 
-void handleLogFile(string local, FileCopyList& filesAfter, ArgumentList& args)
+void handle_log_file(string local, FileCopyList& filesAfter, ArgumentList& args)
 {
-	Configuration &config = getConfiguration();
+	Configuration &config = get_configuration();
 
 	// Add to list of files to copy back and generate remote filename
 
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 	int ret = EXIT_FAILURE;
 
 	try {
-		Configuration& config = getConfiguration();
+		Configuration& config = get_configuration();
 
 		ArgumentList args;
 		FileCopyList filesBefore;
@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
 
 		while (true)
 		{
+			// getopt from avrdude source code.
 			int opt = getopt(argc,argv,"?Ab:B:c:C:DeE:Fi:l:np:OP:qstU:uvVx:yY:");
 			if (opt == -1)
 			{
@@ -117,11 +118,11 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'U':
-				handleUpdate(optarg, filesBefore, filesAfter, args);
+				handle_update(optarg, filesBefore, filesAfter, args);
 				break;
 
 			case 'l':
-				handleLogFile(optarg, filesAfter, args);
+				handle_log_file(optarg, filesAfter, args);
 				break;
 
 			default:

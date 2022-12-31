@@ -1,7 +1,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <map>
+#include <unordered_map>
 #include <stdlib.h>
 
 #include "configuration.h"
@@ -12,23 +12,23 @@
 #endif
 
 using std::string;
-using std::map;
+using std::unordered_map;
 using std::ifstream;
 using std::istringstream;
 using std::ostringstream;
 using std::invalid_argument;
 using std::getline;
 
-using OptionMap = map<string,string>;
+using OptionMap = unordered_map<string,string>;
 
-string getConfigFileName()
+string get_config_filename()
 {
 	string homeDir(getenv("HOME"));
 
 	return homeDir + string("/.local/remote_avrdude.conf");
 }
 
-string parseFile(ifstream& file, OptionMap& options)
+string parse_file(ifstream& file, OptionMap& options)
 {
 	string key, value, problem;
 	char buffer[255];
@@ -76,7 +76,7 @@ string parseFile(ifstream& file, OptionMap& options)
 	return problem;
 }
 
-string mapOptionsToConfig(OptionMap& options, Configuration& config)
+string map_options_to_config(OptionMap& options, Configuration& config)
 {
 	string problem;
 
@@ -122,7 +122,7 @@ string mapOptionsToConfig(OptionMap& options, Configuration& config)
 	return problem;
 }
 
-string checkRequiredConfig(Configuration& config)
+string check_required_config(Configuration& config)
 {
 	string problem;
 	
@@ -140,7 +140,7 @@ string checkRequiredConfig(Configuration& config)
 	return problem;
 }
 
-Configuration& getConfiguration()
+Configuration& get_configuration()
 {
 	static Configuration config;
 
@@ -149,14 +149,14 @@ Configuration& getConfiguration()
 		return config;
 	}
 
-	ifstream configFile(getConfigFileName());
+	ifstream configFile(get_config_filename());
 
 	OptionMap options;
 	string problem;
 
 	if (configFile.good())
 	{
-		problem = parseFile(configFile, options);
+		problem = parse_file(configFile, options);
 	}
 	else
 	{
@@ -165,18 +165,18 @@ Configuration& getConfiguration()
 
 	if (problem.empty())
 	{
-		problem = mapOptionsToConfig(options, config);
+		problem = map_options_to_config(options, config);
 	}
 
 	if (problem.empty())
 	{
-		problem = checkRequiredConfig(config);
+		problem = check_required_config(config);
 	}
 			   
 	if (!problem.empty()) 
 	{
 		std::ostringstream ss;
-		ss << "There was an error processing the config file " << getConfigFileName() << ", " << problem;
+		ss << "There was an error processing the config file " << get_config_filename() << ", " << problem;
 		throw invalid_argument(ss.str());
 	}
 

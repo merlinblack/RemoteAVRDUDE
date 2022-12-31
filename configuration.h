@@ -26,9 +26,9 @@ class Configuration {
         avrdude("/usr/local/bin/avrdude")
         {}
 
-    friend Configuration& getConfiguration();
+    friend Configuration& get_configuration();
 };
 
-Configuration& getConfiguration();
+Configuration& get_configuration();
 
 #endif // CONFIG_H
