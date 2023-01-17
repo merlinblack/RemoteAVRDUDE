@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <unordered_map>
+#include <variant>
 #include <stdlib.h>
 
 #include "configuration.h"
@@ -12,6 +13,9 @@
 #endif
 
 using std::string;
+using std::variant;
+using std::holds_alternative;
+using std::get;
 using std::unordered_map;
 using std::ifstream;
 using std::istringstream;
@@ -25,7 +29,7 @@ string get_config_filename()
 {
 	string homeDir(getenv("HOME"));
 
-	return homeDir + string("/.local/remote_avrdude.conf");
+	return homeDir + "/.local/remote_avrdude.conf";
 }
 
 string parse_file(ifstream& file, OptionMap& options)
@@ -83,14 +87,13 @@ string map_options_to_config(OptionMap& options, Configuration& config)
 	class Option {
 		public:
 		string key;
-		string *strptr;
-		bool *boolptr;
+		variant<string*,bool*> ptr;
 	};
 
 	Option availableOptions[] = {
 		{ "hostname", &config.hostname },
-		{ "quiet",    nullptr, &config.quiet },
-		{ "clean",    nullptr, &config.clean },
+		{ "quiet",    &config.quiet },
+		{ "clean",    &config.clean },
 		{ "scp",      &config.scp },
 		{ "ssh",      &config.ssh },
 		{ "avrdude",  &config.avrdude },
@@ -103,13 +106,13 @@ string map_options_to_config(OptionMap& options, Configuration& config)
 		{
 			if (options.count(opt.key))
 			{
-				if (opt.boolptr)
+				if (holds_alternative<bool*>(opt.ptr))
 				{
-					*opt.boolptr = str2bool(options[opt.key]);
+					*get<bool*>(opt.ptr) = str2bool(options[opt.key]);
 				}
 				else
 				{
-					*opt.strptr = options[opt.key];
+					*get<string*>(opt.ptr) = options[opt.key];
 				}                
 			}
 		}
