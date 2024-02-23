@@ -9,7 +9,7 @@ Personally I use it to run AVRDUDE on a Raspberry PI from my desktop to program 
 It is assumed you can ssh without password (i.e. with ssh keys), hence no options to handle this.
 Options are stored in a configuration file, in order to avoid conflicts with the options of AVRDUDE, now and in the future.
 
-This file is located at ```$HOME/.local/remote_avrdude.conf```
+This file is located at ```$HOME/.config/remote_avrdude.conf```
 
 ## Options:
 
