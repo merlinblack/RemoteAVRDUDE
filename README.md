@@ -25,7 +25,7 @@ For example:
 ### quiet
 Display files being copied and transposed command line on the destination.
 
-Default is on.
+Default is on (false).
 
 ### scp
 Where to find the scp execuatable, default is ```/usr/bin/scp```

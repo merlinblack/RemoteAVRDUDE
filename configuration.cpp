@@ -27,9 +27,19 @@ using OptionMap = unordered_map<string,string>;
 
 string get_config_filename()
 {
-	string homeDir(getenv("HOME"));
+	string configDir;
 
-	return homeDir + "/.local/remote_avrdude.conf";
+	if (getenv("XDG_CONFIG_HOME"))
+	{
+		configDir = getenv("XDG_CONFIG_HOME");
+	}
+	else
+	{
+		string homeDir(getenv("HOME"));
+		configDir = homeDir + "/.config";
+	}
+
+	return configDir + "/remote_avrdude.conf";
 }
 
 string parse_file(ifstream& file, OptionMap& options)
@@ -102,7 +112,7 @@ string map_options_to_config(OptionMap& options, Configuration& config)
 
 	try
 	{
-		for(auto& opt : availableOptions)
+		for(const auto& opt : availableOptions)
 		{
 			if (options.count(opt.key))
 			{
