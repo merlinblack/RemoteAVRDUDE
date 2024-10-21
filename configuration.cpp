@@ -3,6 +3,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <variant>
+#include <filesystem>
 #include <stdlib.h>
 
 #include "configuration.h"
@@ -22,12 +23,13 @@ using std::istringstream;
 using std::ostringstream;
 using std::invalid_argument;
 using std::getline;
+using std::filesystem::path;
 
 using OptionMap = unordered_map<string,string>;
 
 string get_config_filename()
 {
-	string configDir;
+	path configDir;
 
 	if (getenv("XDG_CONFIG_HOME"))
 	{
@@ -35,11 +37,11 @@ string get_config_filename()
 	}
 	else
 	{
-		string homeDir(getenv("HOME"));
-		configDir = homeDir + "/.config";
+		configDir = getenv("HOME");
+		configDir /= ".config";
 	}
 
-	return configDir + "/remote_avrdude.conf";
+	return configDir / "remote_avrdude.conf";
 }
 
 string parse_file(ifstream& file, OptionMap& options)
@@ -97,7 +99,7 @@ string map_options_to_config(OptionMap& options, Configuration& config)
 	class Option {
 		public:
 		string key;
-		variant<string*,bool*> ptr;
+		variant<string*,bool*,path*> ptr;
 	};
 
 	Option availableOptions[] = {
@@ -119,6 +121,10 @@ string map_options_to_config(OptionMap& options, Configuration& config)
 				if (holds_alternative<bool*>(opt.ptr))
 				{
 					*get<bool*>(opt.ptr) = str2bool(options[opt.key]);
+				}
+				else if (holds_alternative<path*>(opt.ptr))
+				{
+					*get<path*>(opt.ptr) = options[opt.key];
 				}
 				else
 				{
@@ -142,12 +148,6 @@ string check_required_config(Configuration& config)
 	if (config.hostname.size() == 0)
 	{
 		problem = "Missing hostname from configuration.";
-	}
-
-	// Make sure remote dir has a '/' on the end.
-	if (*(config.remoteDir.rbegin()) != '/')
-	{
-		config.remoteDir.append("/");
 	}
 
 	return problem;

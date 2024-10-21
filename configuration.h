@@ -2,6 +2,7 @@
 #define CONFIG_H
 
 #include <string>
+#include <filesystem>
 
 class Configuration {
     public:
@@ -9,10 +10,10 @@ class Configuration {
     std::string hostname;
     bool quiet;
     bool clean;
-    std::string remoteDir;
-    std::string scp;
-    std::string ssh;
-    std::string avrdude;
+    std::filesystem::path remoteDir;
+    std::filesystem::path scp;
+    std::filesystem::path ssh;
+    std::filesystem::path avrdude;
 
     private:
     Configuration() :

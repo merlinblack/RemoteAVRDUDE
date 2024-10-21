@@ -6,20 +6,23 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <filesystem>
 #include <stdexcept>
 
 using std::string;
 using std::vector;
 using std::runtime_error;
+using std::filesystem::path;
 using StringVector = vector<string>;
 
-int call_external(const string& path, const StringVector& args)
+int call_external(const path& path, const StringVector& args)
 {
 	vector<char *> cargs;
+	string path_str(path.string());
 
 	cargs.reserve(args.size()+1);
 
-	cargs.push_back(const_cast<string&>(path).data());
+	cargs.push_back(path_str.data());
 
 	for(const string& sp: args)
 	{
@@ -35,7 +38,7 @@ int call_external(const string& path, const StringVector& args)
 	{
 		if(-1 == execv(cargs[0], cargs.data()))
 		{
-			throw runtime_error(string("Could not execute: ") + path);
+			throw runtime_error(string("Could not execute: ") + path_str);
 		}
 	}
 
@@ -45,7 +48,7 @@ int call_external(const string& path, const StringVector& args)
 
 	if (!WIFEXITED(status))
 	{
-		throw runtime_error(string("Problem executing: ") + path);
+		throw runtime_error(string("Problem executing: ") + path_str);
 	}
 
 	return WEXITSTATUS(status);
