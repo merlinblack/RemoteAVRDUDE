@@ -9,10 +9,6 @@
 #include "configuration.h"
 #include "stringmanip.h"
 
-#ifdef DEBUG
-#include <iostream>
-#endif
-
 using std::string;
 using std::variant;
 using std::holds_alternative;
@@ -37,6 +33,9 @@ string get_config_filename()
 	}
 	else
 	{
+		if (!getenv("HOME"))
+            throw invalid_argument("Could not get users home directory from environment variable HOME");
+
 		configDir = getenv("HOME");
 		configDir /= ".config";
 	}
