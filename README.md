@@ -1,6 +1,6 @@
 # Remote AVRDUDE
 
-Written for Linux. Probably will work on MacOS.
+Written for Linux. Will work on MacOS. Should work on Windows in theory.
 
 Uses scp and ssh to run AVRDUDE on another machine, first copying any input files, and afterwards copying any output files back.
 
